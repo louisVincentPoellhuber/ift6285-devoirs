@@ -18,6 +18,7 @@ felipe@ift6285
 
 import argparse
 import sys 
+import re
  
 from xml.dom.minidom import parse, parseString
 
@@ -69,10 +70,40 @@ def parse(sent):
     return l           
 
 # ---------------------------------------------
+# @function evaluates the correction of a corrected text
+# @returns hard accuracy and soft accuracy
+# ---------------------------------------------
+def evaluate_correction(path):
+    corrected_file = open(path).read()
+    correction_pattern = r'<correction.*?</correction>'
+    matches = re.findall(correction_pattern, corrected_file)
+
+    hardacc = []
+    softacc = []
+    extraction_pattern = '<correction orig="|" typo="|">|</correction>'
+    for correction in matches: 
+        subbed_corr = re.sub(extraction_pattern, " ", correction) # Remove all the fluff
+        extracted_words = subbed_corr.split(" ")[1:-1] # remove the frst and last splits, which will always be empty
+
+        original = extracted_words[0] 
+        corrected = extracted_words[2:]
+
+        hardacc.append(original == corrected[0])
+        softacc.append(original in corrected)
+
+    hard_accuracy = sum(hardacc) / len(hardacc)
+    soft_accuracy = sum(softacc) / len(softacc)
+
+    print(f"Hard accuracy: {round(hard_accuracy, 2)}\nSoft accuracy: {round(soft_accuracy, 2)}")
+        
+    return hard_accuracy, soft_accuracy
+
+# ---------------------------------------------
 #        lets dance
 # ---------------------------------------------
 
 args = get_args() 
+print(sys.stdin)
 
 for i,line in enumerate(sys.stdin,1):
 
@@ -85,6 +116,7 @@ for i,line in enumerate(sys.stdin,1):
 
     # looks good (enough) to me
     # plug evaluation code here
+    #hard_acc, soft_acc = evaluate_correction(sys.stdin)
 
     # just be verbose 
     if args.verbosity > 0:
