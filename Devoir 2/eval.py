@@ -73,8 +73,8 @@ def parse(sent):
 # @function evaluates the correction of a corrected text
 # @returns hard accuracy and soft accuracy
 # ---------------------------------------------
-def evaluate_correction(path):
-    corrected_file = open(path).read()
+def evaluate_correction(file):
+    corrected_file = file.read()
     correction_pattern = r'<correction.*?</correction>'
     matches = re.findall(correction_pattern, corrected_file)
 
@@ -103,7 +103,6 @@ def evaluate_correction(path):
 # ---------------------------------------------
 
 args = get_args() 
-print(sys.stdin)
 
 for i,line in enumerate(sys.stdin,1):
 
@@ -116,7 +115,7 @@ for i,line in enumerate(sys.stdin,1):
 
     # looks good (enough) to me
     # plug evaluation code here
-    #hard_acc, soft_acc = evaluate_correction(sys.stdin)
+    hard_acc, soft_acc = evaluate_correction(sys.stdin)
 
     # just be verbose 
     if args.verbosity > 0:
